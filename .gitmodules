@@ -1,0 +1,9 @@
+[submodule "deps/parse"]
+	path = deps/parse
+	url = https://github.com/tsn-lang/parse.git
+[submodule "deps/codegen"]
+	path = deps/codegen
+	url = https://github.com/tsn-lang/codegen.git
+[submodule "test/Catch2"]
+	path = test/Catch2
+	url = https://github.com/catchorg/Catch2.git

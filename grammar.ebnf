@@ -1,0 +1,192 @@
+(* visualize with https://jacquev6.github.io/DrawGrammar/ *)
+
+tsnModule = { topLevel | whitespace };
+
+topLevel = statement
+         | (functionDeclaration, ";")
+         | functionDefinition
+         | (classDeclaration, ";")
+         | classDefinition
+         | (typeDeclaration, ";")
+         | typeDefinition
+         | (enumDeclaration, ";")
+         | enumDefinition
+         | (importStatement, ";")
+         | (exportStatement, ";");
+
+(* classes *)
+propertyAccessorDeclaration = (("get", identifier, "(", ")") | ("set", identifier, "(", typedParameter, ")")), ":", typeSpecifier;
+propertyAccessorDefinition = propertyAccessorDeclaration, statementBlock;
+classProperty = ["public" | "private"], ["static"], ((propertyAccessorDeclaration, ";") | propertyAccessorDefinition | (identifier, ":", typeSpecifier, ";"));
+namedClassMethodDeclaration = (identifier, "(", [typedParameterList], ")", ":", typeSpecifier);
+classBinaryOperatorMethodDeclaration = ("operator", binaryOperator, "(", typedParameter, ")", ":", typeSpecifier);
+classPrefixUnaryOperatorMethodDeclaration = ("operator", prefixUnaryOperator, "(", ")", ":", typeSpecifier);
+classPostfixUnaryOperatorMethodDeclaration = ("operator", postfixUnaryOperator, "(", "postfix", ")", ":", typeSpecifier);
+classMethodDeclaration = ["public" | "private"], ["static"], ["async"], (namedClassMethodDeclaration | classBinaryOperatorMethodDeclaration | classPrefixUnaryOperatorMethodDeclaration | classPostfixUnaryOperatorMethodDeclaration);
+classMethodDefinition = classMethodDeclaration, statementBlock;
+classBody = "{", {[ classProperty | (classMethodDeclaration, ";") | classMethodDefinition ]}, "}";
+
+(* declarations *)
+functionDeclaration = ["async"], "function", identifier, "(", [parameterList], ")", ":", typeSpecifier;
+functionDefinition = functionDeclaration, statementBlock;
+classDeclaration = "class", identifier, ["<", typeParameterList, ">"], ["extends", typeSpecifier, [{ ",", typeSpecifier }]];
+classDefinition = classDeclaration, classBody;
+typeDeclaration = "type", identifier;
+typeDefinition = typeDeclaration, "=", typeSpecifier;
+enumDeclaration = "enum", identifier;
+enumField = identifier, ["=", expression];
+enumDefinition = enumDeclaration, "{", [enumField, { ",", enumField }], "}";
+
+(* parameters *)
+parameter = assignable;
+typedParameter = typedAssignable;
+typeParameter = identifier;
+parameterList = parameter, [{ ",", parameter }];
+typedParameterList = typedParameter, [{ ",", typedParameter }];
+typeParameterList = typeParameter, [{ ",", typeParameter }];
+
+(* arguments *)
+typeArgumentList = typeSpecifier, [{ ",", typeSpecifier }];
+functionArguments = "(", [expressionSequence], ")";
+
+(* type specifier *)
+typeModifier = ("[", "]") | "*";
+identifierTypeSpecifier = identifier, ["<", typeArgumentList, ">"];
+objectTypeSpecifier = "{", [{ typedAssignable, ";" }], "}";
+arrayTypeSpecifier = "[", typedAssignable, [{ ",", typedAssignable }], "]";
+functionTypeSpecifier = "(", [typedParameterList], ")", "=>", typeSpecifier;
+parenthesizedTypeSpecifier = "(", typeSpecifier, ")";
+typeSpecifier = (identifierTypeSpecifier | objectTypeSpecifier | arrayTypeSpecifier | functionTypeSpecifier | parenthesizedTypeSpecifier), [{typeModifier}];
+
+(* misc *)
+assignable = identifier;
+typedAssignable = identifier, ":", typeSpecifier;
+destructureObject = "{", assignable, [{ ",", assignable }], "}";
+destructureArray = "[", assignable, [{ ",", assignable }], "]";
+destructureTarget = destructureObject | destructureArray;
+
+(* operators *)
+binaryOperator = "+"   | "-"  | "*"  | "/"  | "%"  | "&"   | "|"   | "&&" 
+               | "||"  | "^"  | "<"  | ">"  | "="  | "<<"  | ">>"  | "**"
+               | "+="  | "-=" | "*=" | "/=" | "%=" | "&="  | "|="  | "&&="
+               | "||=" | "^=" | "<=" | ">=" | "==" | "<<=" | ">>=" | "**="
+               | "!="  | "[]";
+prefixUnaryOperator = "++" | "--" | "~" | "!" | "-" | "*";
+postfixUnaryOperator = "++" | "--";
+assignmentOperator = "+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "&=" | "|=" | "^=" | "<<=" | ">>=" | "&&=" | "||=";
+
+(* expressions *)
+typeinfoExpression = "typeinfo", "<", typeSpecifier, ">";
+sizeofExpression = "sizeof", "<", typeSpecifier, ">";
+parenthesizedExpression = "(", expression, ")";
+parenthesizedExpressionSequence = "(", expressionSequence, ")";
+expressionSequence = expression, [{ ",", expression }];
+primaryExpression = "this" | typeinfoExpression | sizeofExpression | literal | identifierTypeSpecifier | parenthesizedExpression | parenthesizedExpressionSequence;
+functionExpression = "function", "(", [parameterList], ")", [":", typeSpecifier], statementBlock;
+arrowFunctionExpression = "(", [parameterList], ")", [":", typeSpecifier], "=>", (expression | statementBlock);
+memberExpressionPart = (".", identifier) | ("[", expression, "]");
+memberExpressionTail = { memberExpressionPart };
+memberExpression = (primaryExpression | functionExpression | arrowFunctionExpression), [memberExpressionTail];
+newExpression = ("new", typeSpecifier, functionArguments, ["=>", expression]) | memberExpression;
+callExpression = newExpression, [functionArguments, [{ memberExpressionPart | functionArguments }]];
+postfixUnaryExpression = callExpression, [postfixUnaryOperator];
+prefixUnaryExpression = [prefixUnaryExpression], postfixUnaryExpression;
+castExpression = prefixUnaryExpression, [{ "as", typeSpecifier }];
+exponentExpression = castExpression, ["**", expression];    
+multiplicativeExpression = exponentExpression, [("*", "/", "%"), expression];
+additiveExpression = multiplicativeExpression, [("+", "-"), expression];
+bitShiftExpression = additiveExpression, [("<<" | ">>"), expression];
+relationalExpression = bitShiftExpression, [("<" | ">" | "<=" | ">="), expression];
+equalityExpression = relationalExpression, [("==" | "!="), expression];
+bitAndExpression = equalityExpression, ["&", expression];
+bitXOrExpression = bitAndExpression, ["^", expression];
+bitOrExpression = bitXOrExpression, ["|", expression];
+logicalAndExpression = bitOrExpression, ["&&", expression];
+logicalOrExpression = logicalAndExpression, ["||", expression];
+conditionalExpression = logicalOrExpression, ["?", expression, ":", expression];
+assignmentExpression = conditionalExpression, ["=", expression];
+assignmentOperatorExpression = assignmentExpression, [assignmentOperator, expression];
+awaitExpression = ["await"], assignmentOperatorExpression;
+expression = awaitExpression;
+
+(* statements *)
+statementBlock = "{", [{ statement }], "}";
+declarationStatement = ("const" | "let"), (assignable, typedAssignable, destructureTarget), ["=", expression];
+expressionStatement = expressionSequence;
+ifStatement = "if", "(", expression, ")", statement, ["else", statement];
+forLoop = "for", "(", {declarationStatement}, ";", {expression}, ";", {expression}, ")", statement;
+whileLoop = "while", "(", expression, ")", statement;
+doWhileLoop = "do", statement, "while", "(", expression, ")";
+switchStatement = "switch", "(", expression, ")", "{", [{ switchCase }], "}";
+switchCase = ("case", expression, ":", [statement]) | ("default", ":", [statement]);
+tryCatchStatement = "try", statement, catchBlock, [{ catchBlock }];
+catchBlock = "catch", "(", typedAssignable, ")", statement;
+importAllStatement = "import", "*", ["as", identifier], "from", stringLiteral;
+importSelectStatement = "import", "{", identifier, [{ ",", identifier }], "}", "from", stringLiteral;
+importStatement = importAllStatement | importSelectStatement;
+exportable = classDeclaration
+           | classDefinition
+           | functionDeclaration
+           | functionDefinition
+           | typeDeclaration
+           | typeDefinition
+           | enumDeclaration
+           | enumDefinition
+           | declarationStatement
+           | identifier;
+exportStatement = "export", exportable;
+statement = ";"
+          | "break", ";"
+          | "continue", ";"
+          | "return", [expression], ";"
+          | "throw", [expression], ";"
+          | "delete", expression, ";"
+          | declarationStatement, ";"
+          | statementBlock
+          | expressionStatement, ";"
+          | ifStatement
+          | forLoop
+          | switchStatement
+          | whileLoop
+          | doWhileLoop
+          | tryCatchStatement;
+
+(* comments *)
+lineComment = "//", [notNewline], ("\n" | endOfInput);
+blockComment = "/*", [notEndBlockComment], ("*/" | endOfInput);
+comment = lineComment | blockComment;
+
+(* literals *)
+integerLiteral = { digit }, ["ub" | "us" | "ul" | "ull" | "b" | "s" | "l" | "ll"];
+floatLiteral = { digit }, ".", { digit }, [('e' | 'E'), ['-' | '+'], { digit }], ["f" | "F"];
+stringLiteral = ("'", { quotedText | "\\'" }, "'") | ("`", { backtickedText | "\\`" }, "`");
+hexLiteral = "0", ("x" | "X"), { hexDigit }, ["ub" | "us" | "ul" | "ull" | "b" | "s" | "l" | "ll"];
+binLiteral = "0", ("b" | "B"), { binDigit }, ["ub" | "us" | "ul" | "ull" | "b" | "s" | "l" | "ll"];
+booleanLiteral = "true" | "false";
+objectLiteral = "{", [identifier, ":", expression, [{ ",", identifier, ":", expression }]], "}";
+arrayLiteral = "[", { expression, [{ ",", expression }] }, "]";
+literal = integerLiteral
+        | floatLiteral
+        | stringLiteral
+        | hexLiteral
+        | binLiteral
+        | booleanLiteral
+        | objectLiteral
+        | arrayLiteral
+        | 'null';
+
+(* atoms *)
+letter = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+       | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z";
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+hexDigit = digit | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | "D" | "E" | "F";
+binDigit = "0" | "1";
+identifier = letter, { letter | digit | "_" };
+whitespace = " " | "\n" | "\r" | "\t" | "\f" | "\v";
+
+(* special *)
+quotedText = ? any character except "'" ?;
+backtickedText = ? any character except "`" ?;
+notNewline = ? any character except "\n" ?;
+notEndBlockComment = ? any character that is not "*" followed by "\"" ?;
+endOfInput = ? end of input ?;

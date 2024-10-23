@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="parse::Node">
+        <DisplayString Condition="m_ctx != 0">
+            {m_ctx->m_source->m_src->m_contents + m_location.startBufferPosition,[m_location.endBufferPosition - m_location.startBufferPosition]s} 
+        </DisplayString>
+        <DisplayString Condition="m_ctx == 0">Invalid Node</DisplayString>
+    </Type>
+</AutoVisualizer>
