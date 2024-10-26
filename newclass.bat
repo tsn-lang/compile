@@ -19,8 +19,13 @@ cd "./include/compile/%dir_name%"
 %printf% "    };\n" >> %header_name%
 %printf% "};" >> %header_name%
 
-cd "../../../src/%dir_name%"
-%printf% "#include <compile/%dir_name%/%header_name%>\n\n" >> %src_name%
+IF "%dir_name%" == "" (
+    cd "../../src/%dir_name%"
+    %printf% "#include <compile/%header_name%>\n\n" >> %src_name%
+) ELSE (
+    cd "../../../src/%dir_name%"
+    %printf% "#include <compile/%dir_name%/%header_name%>\n\n" >> %src_name%
+)
 %printf% "namespace compile {\n" >> %src_name%
 %printf% "    %class_name%::%class_name%() {\n" >> %src_name%
 %printf% "    }\n" >> %src_name%
@@ -29,5 +34,9 @@ cd "../../../src/%dir_name%"
 %printf% "    }\n" >> %src_name%
 %printf% "};" >> %src_name%
 
-cd "../../"
+IF "%dir_name%" == "" (
+    cd "../"
+) ELSE (
+    cd "../../"
+)
 copy /b CMakeLists.txt +,,

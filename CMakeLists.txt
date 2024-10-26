@@ -33,22 +33,31 @@ endmacro(add_sources)
 
 add_sources("src"              ".")
 add_sources("src/ast"          "ast")
+add_sources("src/ast/compile"  "ast/compile")
+add_sources("src/interfaces"   "interfaces")
+add_sources("src/types"        "types")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+if (NOT TARGET utils)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/utils)
+endif()
+include_directories(${TSN_UTILS_INCLUDE_DIR})
+
 if (NOT TARGET parse)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/parse)
 endif()
+include_directories(${TSN_PARSE_INCLUDE_DIR})
+
 if (NOT TARGET codegen)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/codegen)
 endif()
 
 include_directories(
+    ${TSN_CODEGEN_INCLUDE_DIR}
     ${TSN_COMPILE_INCLUDE_DIR}
     ${TSN_PARSE_INCLUDE_DIR}
-    ${TSN_CODEGEN_INCLUDE_DIR}
     ${TSN_BIND_INCLUDE_DIR}
     ${TSN_TOKENIZE_INCLUDE_DIR}
-    ${TSN_UTILS_INCLUDE_DIR}
     ${FFI_INCLUDE_DIR}
 )
 
