@@ -9,6 +9,7 @@
 #include <parse/types/TypeSpecifierNode.h>
 #include <bind/Registry.hpp>
 #include <utils/Array.hpp>
+#include <utils/interfaces/IWithUserData.hpp>
 
 using namespace parse;
 using namespace bind;
@@ -50,26 +51,42 @@ namespace compile {
         }
 
         if (tp) {
-            if (node->parameters.size() == 0) {
-                // todo: check if tp is a template, error if so
-                m_resolvedTypeStack.push(tp);
-            } else {
-                // todo: check if tp is a template, error if not
-                TemplateType* templ = nullptr;
+            tsn_type_userdata& data = tp->getUserData<tsn_type_userdata>();
 
-                if (node->parameters.size() != templ->getTypeArgumentCount()) {
+            if (node->parameters.size() == 0) {
+                if (data.flags.indicator_bit == 1 && data.flags.is_template == 1) {
+                    TemplateType* templ = (TemplateType*)tp;
                     m_ctx->logError(
-                        "Type '%s' expects %d %s but %d %s provided",
+                        "Type '%s' expects %d type %s but none were provided",
                         node->name->text.c_str(),
                         templ->getTypeArgumentCount(),
-                        templ->getTypeArgumentCount() == 1 ? "argument" : "arguments",
-                        node->parameters.size(),
-                        node->parameters.size() == 1 ? "was" : "were"
+                        templ->getTypeArgumentCount() == 1 ? "argument" : "arguments"
                     );
                     m_resolvedTypeStack.push(poison);
                 } else {
-                    bind::DataType* tp = m_ctx->specializeType(this, templ, node->parameters.cast<parse::Node*>());
                     m_resolvedTypeStack.push(tp);
+                }
+            } else {
+                if (data.flags.indicator_bit == 0 || data.flags.is_template == 0) {
+                    m_ctx->logError("Type '%s' is not a template", node->name->text.c_str());
+                    m_resolvedTypeStack.push(poison);
+                } else {
+                    TemplateType* templ = (TemplateType*)tp;
+
+                    if (node->parameters.size() != templ->getTypeArgumentCount()) {
+                        m_ctx->logError(
+                            "Type '%s' expects %d type %s but %d %s provided",
+                            node->name->text.c_str(),
+                            templ->getTypeArgumentCount(),
+                            templ->getTypeArgumentCount() == 1 ? "argument" : "arguments",
+                            node->parameters.size(),
+                            node->parameters.size() == 1 ? "was" : "were"
+                        );
+                        m_resolvedTypeStack.push(poison);
+                    } else {
+                        bind::DataType* tp = m_ctx->specializeType(this, templ, node->parameters.cast<parse::Node*>());
+                        m_resolvedTypeStack.push(tp);
+                    }
                 }
             }
         }

@@ -7,12 +7,16 @@
 #include <bind/util/meta.hpp>
 #include <bind/Function.h>
 #include <utils/Array.hpp>
+#include <utils/interfaces/IWithUserData.hpp>
 
 namespace compile {
     TemplateType::TemplateType(const String& name, u32 typeArgumentCount, bind::Namespace*ns)
         : bind::DataType(name, bind::meta<void>(), ns), m_typeArgumentCount(typeArgumentCount),
         m_postProcessMask(0xFFFFFFFF), m_specializationData(nullptr), m_specializer(nullptr)
     {
+        tsn_type_userdata& data = getUserData<tsn_type_userdata>();
+        data.flags.indicator_bit = 1;
+        data.flags.is_template = 1;
     }
 
     TemplateType::~TemplateType() {
