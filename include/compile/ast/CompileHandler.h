@@ -14,6 +14,8 @@ namespace compile {
             CompileHandler(Context* ctx);
             virtual ~CompileHandler();
 
+            bind::DataType* popLastType();
+
             virtual void visit(parse::ArrayLiteralNode* node);
             virtual void visit(parse::ArrayTypeNode* node);
             virtual void visit(parse::ArrowFunctionExpressionNode* node);

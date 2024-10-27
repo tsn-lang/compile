@@ -21,6 +21,7 @@ namespace compile {
     class IModuleSource;
     class CompiledFunction;
     class TemplateType;
+    class TemplateFunction;
     class CompileHandler;
     
     struct CompileMessage {
@@ -59,6 +60,7 @@ namespace compile {
             void exitFunction();
             Scope* enterScope(bool isExplicit);
 
+            void importGlobals();
             void addDependency(Module* mod);
             void addImport(Symbol* sym);
             void mapSymbol(Symbol* sym, const SourceLocation& loc);
@@ -66,7 +68,7 @@ namespace compile {
             void onFunctionCompiled(CompiledFunction* cf);
             void onFunctionGenerated(bind::Function* func);
             void onTypeGenerated(bind::DataType* type);
-            bind::DataType* specializeType(CompileHandler* ch, TemplateType* templ, const Array<parse::Node*>& typeArgs);
+            void onSymbolGenerated(Symbol* sym);
             
             Module* getModule() const;
             Scope* getGlobalScope() const;
@@ -100,6 +102,7 @@ namespace compile {
             Array<Module*> m_dependencies;
             Array<Symbol*> m_imports;
             Array<Scope*> m_allScopes;
+            Array<Symbol*> m_allSymbols;
             Array<SymbolMapEntry> m_symbolMap;
             Array<CompileMessage> m_logs;
             Array<bind::Function*> m_generatedFunctions;

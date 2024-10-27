@@ -11,4 +11,8 @@ namespace compile {
 
     CompileHandler::~CompileHandler() {
     }
+
+    bind::DataType* CompileHandler::popLastType() {
+        return m_resolvedTypeStack.pop();
+    }
 };

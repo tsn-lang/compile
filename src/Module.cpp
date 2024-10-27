@@ -14,11 +14,4 @@ namespace compile {
     bind::Namespace* Module::getNamespace() const {
         return m_namespace;
     }
-
-    const Array<Symbol*>& Module::getSymbols() const {
-        return m_allSymbols;
-    }
-
-    void Module::findSymbols(const String& name, utils::Array<Symbol*>& out) const {
-    }
 };

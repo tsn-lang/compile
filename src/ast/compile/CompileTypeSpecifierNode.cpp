@@ -1,6 +1,7 @@
 #include <compile/ast/CompileHandler.h>
 #include <compile/Context.h>
 #include <compile/CompiledFunction.h>
+#include <compile/types/BuiltinArray.h>
 #include <codegen/FunctionBuilder.h>
 #include <parse/types/TypeSpecifierNode.h>
 #include <bind/Registry.hpp>
@@ -22,7 +23,7 @@ namespace compile {
             m_resolvedTypeStack.push(tp->getPointerType());
         } else if (node->mod == TypeSpecifierNode::Modifier::Array) {
             TemplateType* arr = (TemplateType*)bind::Registry::GetType<array_t>();
-            bind::DataType* tp = m_ctx->specializeType(this, arr, { node->type });
+            bind::DataType* tp = arr->specialize(m_ctx, this, { node->type });
             m_resolvedTypeStack.push(tp);
         } else {
             node->type->acceptVisitor(this);

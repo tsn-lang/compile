@@ -32,17 +32,32 @@ namespace compile {
             parse::IdentifierNode* name = node->importList[i];
             m_ctx->enterNode(name);
 
-            utils::Array<Symbol*> symbols;
-            mod->findSymbols(name->text, symbols);
+            utils::Array<ISymbol*> symbols;
+            mod->getNamespace()->findSymbols(name->text, symbols);
 
             if (symbols.size() == 0) {
                 m_ctx->logError("Module '%s' has no symbols named '%s'", mod->getNamespace()->getName().c_str(), name->text.c_str());
             } else {
                 for (u32 i = 0;i < symbols.size();i++) {
-                    Symbol* s = symbols[i];
-                    global.add(s->getName(), symbols[i]);
-                    m_ctx->addImport(s);
-                    m_ctx->mapSymbol(s, name->getLocation());
+                    bind::ISymbol* sym = symbols[i];
+                    switch (sym->getSymbolType()) {
+                        case bind::SymbolType::Namespace: break;
+                        case bind::SymbolType::Function: {
+                            Symbol* s = global.add(sym->getName(), (bind::Function*)sym);
+                            m_ctx->addImport(s);
+                            break;
+                        }
+                        case bind::SymbolType::DataType: {
+                            Symbol* s = global.add(sym->getName(), (bind::DataType*)sym);
+                            m_ctx->addImport(s);
+                            break;
+                        }
+                        case bind::SymbolType::Value: {
+                            Symbol* s = global.add(sym->getName(), (bind::ValuePointer*)sym);
+                            m_ctx->addImport(s);
+                            break;
+                        }
+                    }
                 }
             }
 

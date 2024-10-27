@@ -30,12 +30,29 @@ namespace compile {
             Symbol* s = m_ctx->getGlobalScope()->getSymbols().add(node->alias->text, mod);
             m_ctx->mapSymbol(s, node->alias->getLocation());
         } else {
-            const Array<Symbol*>& symbols = mod->getSymbols();
             SymbolTable& global = m_ctx->getGlobalScope()->getSymbols();
+            const Array<bind::ISymbol*>& symbols = mod->getNamespace()->getSymbols();
+
             for (u32 i = 0;i < symbols.size();i++) {
-                Symbol* s = symbols[i];
-                global.add(s->getName(), symbols[i]);
-                m_ctx->addImport(s);
+                bind::ISymbol* sym = symbols[i];
+                switch (sym->getSymbolType()) {
+                    case bind::SymbolType::Namespace: break;
+                    case bind::SymbolType::Function: {
+                        Symbol* s = global.add(sym->getName(), (bind::Function*)sym);
+                        m_ctx->addImport(s);
+                        break;
+                    }
+                    case bind::SymbolType::DataType: {
+                        Symbol* s = global.add(sym->getName(), (bind::DataType*)sym);
+                        m_ctx->addImport(s);
+                        break;
+                    }
+                    case bind::SymbolType::Value: {
+                        Symbol* s = global.add(sym->getName(), (bind::ValuePointer*)sym);
+                        m_ctx->addImport(s);
+                        break;
+                    }
+                }
             }
         }
 

@@ -7,6 +7,7 @@
 namespace compile {
     Scope::Scope(Context* ctx, bool isExplicit) :
         m_ctx(ctx),
+        m_symbols(ctx),
         m_owner(ctx->getCurrentFunction()),
         m_parent(ctx->getCurrentFunction()->getCurrentScope()),
         m_cgScope(ctx->getCurrentFunction()->getBuilder()),

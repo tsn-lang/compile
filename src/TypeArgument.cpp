@@ -15,9 +15,9 @@ namespace compile {
         vsnprintf(buf, 1024, msg, l);
         va_end(l);
 
-        m_ctx->enterNode(m_argNode);
+        if (m_argNode) m_ctx->enterNode(m_argNode);
         m_ctx->logDebug(buf);
-        m_ctx->exitNode();
+        if (m_argNode) m_ctx->exitNode();
     }
 
     void TypeArgument::logInfo(const char* msg, ...) {
@@ -28,9 +28,9 @@ namespace compile {
         vsnprintf(buf, 1024, msg, l);
         va_end(l);
 
-        m_ctx->enterNode(m_argNode);
+        if (m_argNode) m_ctx->enterNode(m_argNode);
         m_ctx->logInfo(buf);
-        m_ctx->exitNode();
+        if (m_argNode) m_ctx->exitNode();
     }
 
     void TypeArgument::logWarn(const char* msg, ...) {
@@ -41,9 +41,9 @@ namespace compile {
         vsnprintf(buf, 1024, msg, l);
         va_end(l);
 
-        m_ctx->enterNode(m_argNode);
+        if (m_argNode) m_ctx->enterNode(m_argNode);
         m_ctx->logWarn(buf);
-        m_ctx->exitNode();
+        if (m_argNode) m_ctx->exitNode();
     }
 
     void TypeArgument::logError(const char* msg, ...) {
@@ -54,9 +54,9 @@ namespace compile {
         vsnprintf(buf, 1024, msg, l);
         va_end(l);
 
-        m_ctx->enterNode(m_argNode);
+        if (m_argNode) m_ctx->enterNode(m_argNode);
         m_ctx->logError(buf);
-        m_ctx->exitNode();
+        if (m_argNode) m_ctx->exitNode();
     }
 
     bind::DataType* TypeArgument::getType() const {

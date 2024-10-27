@@ -7,6 +7,7 @@
 namespace bind {
     class DataType;
     class Function;
+    class ValuePointer;
 };
 
 namespace compile {
@@ -18,6 +19,7 @@ namespace compile {
                 Module = 0,
                 DataType,
                 Function,
+                ValuePointer,
                 Variable
             };
             
@@ -25,18 +27,19 @@ namespace compile {
                 Module* mod;
                 bind::DataType* type;
                 bind::Function* func;
+                bind::ValuePointer* global;
                 codegen::Value var;
             };
 
             Symbol(Module* mod);
             Symbol(bind::DataType* type);
             Symbol(bind::Function* func);
+            Symbol(bind::ValuePointer* global);
             Symbol(const codegen::Value& var);
             ~Symbol();
 
             Type getType() const;
             const Value& getValue() const;
-            const String& getName() const;
             bool hasDeclarationLocation() const;
             bool hasDefinitionLocation() const;
             bool hasLifetimeLocation() const;
@@ -50,7 +53,6 @@ namespace compile {
         protected:
             Type m_type;
             Value m_value;
-            String m_name;
             bool m_hasDeclLoc;
             bool m_hasDefLoc;
             bool m_hasLifetimeLoc;

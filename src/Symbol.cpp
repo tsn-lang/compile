@@ -1,25 +1,41 @@
 #include <compile/Symbol.h>
 
 namespace compile {
-    Symbol::Symbol(Module* mod) : m_value({ mod, nullptr, nullptr, codegen::Value() }) {
+    Symbol::Symbol(Module* mod)
+        : m_value({ mod, nullptr, nullptr, nullptr, codegen::Value() }), m_type(Symbol::Type::Module)
+    {
         m_hasDeclLoc = false;
         m_hasDefLoc = false;
         m_hasLifetimeLoc = false;
     }
 
-    Symbol::Symbol(bind::DataType* type) : m_value({ nullptr, type, nullptr, codegen::Value() }) {
+    Symbol::Symbol(bind::DataType* type)
+        : m_value({ nullptr, type, nullptr, nullptr, codegen::Value() }), m_type(Symbol::Type::DataType)
+    {
         m_hasDeclLoc = false;
         m_hasDefLoc = false;
         m_hasLifetimeLoc = false;
     }
 
-    Symbol::Symbol(bind::Function* func) : m_value({ nullptr, nullptr, func, codegen::Value() }) {
+    Symbol::Symbol(bind::Function* func)
+        : m_value({ nullptr, nullptr, func, nullptr, codegen::Value() }), m_type(Symbol::Type::Function)
+    {
+        m_hasDeclLoc = false;
+        m_hasDefLoc = false;
+        m_hasLifetimeLoc = false;
+    }
+    
+    Symbol::Symbol(bind::ValuePointer* global)
+        : m_value({ nullptr, nullptr, nullptr, global, codegen::Value() }) , m_type(Symbol::Type::ValuePointer)
+    {
         m_hasDeclLoc = false;
         m_hasDefLoc = false;
         m_hasLifetimeLoc = false;
     }
 
-    Symbol::Symbol(const codegen::Value& var) : m_value({ nullptr, nullptr, nullptr, var }) {
+    Symbol::Symbol(const codegen::Value& var)
+        : m_value({ nullptr, nullptr, nullptr, nullptr, var }), m_type(Symbol::Type::Variable)
+    {
         m_hasDeclLoc = false;
         m_hasDefLoc = false;
         m_hasLifetimeLoc = false;
@@ -36,10 +52,6 @@ namespace compile {
 
     const Symbol::Value& Symbol::getValue() const {
         return m_value;
-    }
-
-    const String& Symbol::getName() const {
-        return m_name;
     }
 
     bool Symbol::hasDeclarationLocation() const {

@@ -1,5 +1,5 @@
 #include <compile/types/BuiltinArray.h>
-#include <compile/TypeSpecializer.h>
+#include <compile/TypeSpecializer.hpp>
 #include <compile/TypeArgument.h>
 #include <codegen/Value.h>
 #include <codegen/FunctionBuilder.h>
@@ -23,10 +23,9 @@ namespace compile {
         specializer->addProperty("m_used", Registry::GetType<u32>()).accessFlags = 0;
         specializer->addProperty("m_capacity", Registry::GetType<u32>()).accessFlags = 0;
         specializer->addProperty("m_data", Registry::GetType<void*>()).accessFlags = 0;
-
-        registerMethod(
+        specializer->addMethod(
             "push",
-            Registry::Signature(voidTp, { elemTp }),
+            Registry::MethodSignature(voidTp, specializer->getSpecializedType(), { elemTp }),
             &BuiltinArray::push
         );
 

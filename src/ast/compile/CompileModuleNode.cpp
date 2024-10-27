@@ -27,6 +27,7 @@ namespace compile {
         CompiledFunction* init = new CompiledFunction(m_ctx, initFn);
 
         m_ctx->enterFunction(init);
+        m_ctx->importGlobals();
 
         for (u32 i = 0;i < node->statements.size();i++) {
             parse::TopLevelNode* n = node->statements[i];
